@@ -1,0 +1,112 @@
+service:
+  name: slide-compare-api
+
+plugins:
+  - serverless-plugin-scripts
+  - serverless-webpack
+  - serverless-prune-plugin
+  - serverless-offline
+
+custom:
+  webpack:
+    includeModules:
+      forceExclude:
+        - aws-sdk
+  prune:
+    automatic: true
+    number: 7
+  scripts:
+    hooks:
+      "webpack:package:packExternalModules": /bin/bash .prepackage.sh
+
+package:
+  excludeDevDependencies: true
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-northeast-2
+  tracing:
+    apiGateway: true
+    lambda: true
+  apiGateway:
+    minimumCompressionSize: 1024
+    binaryMediaTypes:
+      - "image/*"
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+        - "s3:GetObjectAcl"
+        - "s3:PutObject"
+        - "s3:PutObjectAcl"
+        - "s3:HeadObject"
+        - "s3:DeleteObject"
+      Resource:
+        - "arn:aws:s3:::${env:TEMP_BUCKET}/*"
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+      Resource:
+        - "arn:aws:s3:::${env:TEMP_BUCKET}"
+  environment:
+    TEMP_BUCKET: ${env:TEMP_BUCKET}
+    PUBLIC_URL: ${env:PUBLIC_URL}
+
+functions:
+  getUploadUrl:
+    handler: src/handlers/getUploadUrl.handle
+    memorySize: 256
+    timeout: 5
+    events:
+      - http: GET /upload/pdf
+  convertPdf:
+    handler: src/handlers/convertPdf.handle
+    memorySize: 2048
+    timeout: 90
+    events:
+      - s3:
+          bucket: ${env:TEMP_BUCKET}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploads/
+            - suffix: .pdf
+          existing: true
+  convertPdfHttp:
+    handler: src/handlers/convertPdf.handleHttp
+    memorySize: 2048
+    timeout: 30
+    events:
+      - http: POST /convert/pdf/{fileKey}
+  getSlide:
+    handler: src/handlers/getSlide.handle
+    memorySize: 256
+    timeout: 5
+    events:
+      - http: GET /slide/{fileKey}/{index}
+  serveHtml:
+    handler: src/handlers/serveHtml.handle
+    memorySize: 256
+    timeout: 5
+    events:
+      - http: GET /
+      - http: GET /{file}
+      - http: GET /static/css/{file}
+      - http: GET /static/js/{file}
+      - http: GET /static/media/{file}
+
+resources:
+  Resources:
+    TempBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:TEMP_BUCKET}
+        LifecycleConfiguration:
+          Rules:
+            - Id: Only1Day
+              Status: Enabled
+              ExpirationInDays: 1
+              NoncurrentVersionExpirationInDays: 1
+              AbortIncompleteMultipartUpload:
+                DaysAfterInitiation: 1
