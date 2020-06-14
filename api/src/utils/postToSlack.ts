@@ -1,6 +1,9 @@
 import fetch from "node-fetch";
 
 export default async function postToSlack(text: string): Promise<void> {
+  if (!("SLACK_WEBHOOK_URL" in process.env)) {
+    return;
+  }
   const response = await fetch(process.env.SLACK_WEBHOOK_URL!, {
     method: "POST",
     headers: {
