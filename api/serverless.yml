@@ -52,7 +52,10 @@ provider:
         - "arn:aws:s3:::${env:TEMP_BUCKET}"
   environment:
     TEMP_BUCKET: ${env:TEMP_BUCKET}
-    PUBLIC_URL: ${env:PUBLIC_URL}
+    CONSOLE_LOG_LEVEL: ${env:CONSOLE_LOG_LEVEL}
+    SLACK_WEBHOOK_URL: ${env:SLACK_WEBHOOK_URL}
+    SLACK_CHANNEL: ${env:SLACK_CHANNEL}
+    SLACK_LOG_LEVEL: ${env:SLACK_LOG_LEVEL}
 
 functions:
   getUploadUrl:
@@ -73,6 +76,8 @@ functions:
             - prefix: uploads/
             - suffix: .pdf
           existing: true
+    # environment:
+    #   SLACK_LOG_LEVEL: debug
   requestToCompare:
     handler: src/handlers/requestToCompare.handle
     memorySize: 256
@@ -91,6 +96,8 @@ functions:
             - prefix: uploads/
             - suffix: .compare
           existing: true
+    # environment:
+    #   SLACK_LOG_LEVEL: debug
   getCompared:
     handler: src/handlers/getCompared.handle
     memorySize: 256
@@ -126,6 +133,14 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${env:TEMP_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - PUT
+              AllowedHeaders:
+                - "*"
+              AllowedOrigins:
+                - ${env:SERVICE_URL}
         LifecycleConfiguration:
           Rules:
             - Id: Only1Day

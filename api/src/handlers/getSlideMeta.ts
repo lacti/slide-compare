@@ -1,17 +1,22 @@
+import "source-map-support/register";
+
+import { ApiError, handleApi } from "./base";
+
 import { APIGatewayProxyHandler } from "aws-lambda";
+import { logger } from "../utils/logger";
 import readSlideMeta from "../slide/readSlideMeta";
 
-export const handle: APIGatewayProxyHandler = async (event) => {
-  const { fileKey } = event.pathParameters ?? {};
-  if (!fileKey) {
-    return { statusCode: 404, body: "Not Found" };
-  }
+const log = logger.get("handle:getSlideMeta", __filename);
 
-  try {
+export const handle: APIGatewayProxyHandler = handleApi({
+  log,
+  handle: async (event) => {
+    const { fileKey } = event.pathParameters ?? {};
+    if (!fileKey) {
+      throw new ApiError(404);
+    }
+
     const meta = await readSlideMeta(fileKey);
     return { statusCode: 200, body: JSON.stringify(meta) };
-  } catch (error) {
-    console.error(error);
-    return { statusCode: 404, body: "Not Found" };
-  }
-};
+  },
+});

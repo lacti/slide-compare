@@ -3,6 +3,9 @@ import MatchPair from "./models/matchPair";
 import buildResultBag from "./buildResultBag";
 import findMatchProcessing from "./findMatchingProcess";
 import listFiles from "../utils/listFiles";
+import { logger } from "../utils/logger";
+
+const log = logger.get("compare", __filename);
 
 export default async function compare({
   leftPath,
@@ -16,6 +19,11 @@ export default async function compare({
 } & Partial<FindAnyMatchedOptions>): Promise<MatchPair[]> {
   const leftFiles = listFiles(leftPath);
   const rightFiles = listFiles(rightPath);
+
+  log.trace(
+    { leftPath, leftFiles, rightPath, rightFiles },
+    "Start to compare with slide files"
+  );
 
   const processing = await findMatchProcessing({
     leftFiles,

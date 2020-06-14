@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
-    "start": "serverless offline",
+    "start": "serverless offline --noPrependStageInUrl",
     "build": "node --max-old-space-size=4096 node_modules/serverless/bin/serverless.js package",
     "deploy": "node --max-old-space-size=4096 node_modules/serverless/bin/serverless.js deploy"
   },
@@ -21,7 +21,6 @@
     "node-fetch": "^2.6.0",
     "p-limit": "^3.0.1",
     "p-timeout": "^3.2.0",
-    "pino": "^6.3.2",
     "rimraf": "^3.0.2",
     "serialize-error": "^7.0.1",
     "sharp": "^0.25.3",
@@ -37,8 +36,6 @@
     "@types/mime-types": "^2.1.0",
     "@types/node": "12",
     "@types/node-fetch": "^2.5.7",
-    "@types/pino": "^6.0.1",
-    "@types/pino-http": "^5.0.1",
     "@types/rimraf": "^3.0.0",
     "@types/tar": "^4.0.3",
     "@types/uuid": "^8.0.0",
@@ -51,7 +48,6 @@
     "eslint-plugin-simple-import-sort": "^5.0.3",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.9",
-    "pino-pretty": "^4.0.0",
     "prettier": "^2.0.5",
     "serverless": "^1.72.0",
     "serverless-offline": "^6.4.0",

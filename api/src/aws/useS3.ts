@@ -1,6 +1,9 @@
 import * as fs from "fs";
 
 import { S3 } from "aws-sdk";
+import { logger } from "../utils/logger";
+
+const log = logger.get("useS3", __filename);
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export default function useS3() {
@@ -14,6 +17,7 @@ export default function useS3() {
     s3ObjectKey: string;
     localFile: string;
   }): Promise<string> {
+    log.trace({ s3ObjectKey, localFile }, "s3:downloadToLocal");
     return new Promise<string>((resolve, reject) =>
       s3
         .getObject({
@@ -35,6 +39,7 @@ export default function useS3() {
     s3ObjectKey: string;
     localFile: string;
   }) {
+    log.trace({ s3ObjectKey, localFile }, "s3:uploadLocalFile");
     return s3
       .upload({
         Bucket: bucketName,
@@ -45,6 +50,7 @@ export default function useS3() {
   }
 
   function deleteKey({ s3ObjectKey }: { s3ObjectKey: string }) {
+    log.trace({ s3ObjectKey }, "s3:deleteKey");
     return s3
       .deleteObject({
         Bucket: bucketName,
@@ -60,6 +66,7 @@ export default function useS3() {
     s3ObjectKey: string;
     value: T | null;
   }) {
+    log.trace({ s3ObjectKey, value }, "s3:putJSON");
     return s3
       .putObject({
         Bucket: bucketName,
@@ -74,6 +81,7 @@ export default function useS3() {
   }: {
     s3ObjectKey: string;
   }): Promise<T | null> {
+    log.trace({ s3ObjectKey }, "s3:getJSON");
     return s3
       .getObject({
         Bucket: bucketName,
@@ -93,6 +101,7 @@ export default function useS3() {
   }: {
     s3ObjectKey: string;
   }): Promise<boolean> {
+    log.trace({ s3ObjectKey }, "s3:exists");
     try {
       await s3
         .headObject({

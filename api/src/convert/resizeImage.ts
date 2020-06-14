@@ -1,6 +1,8 @@
 import { logger } from "../utils/logger";
 import sharp from "sharp";
 
+const log = logger.get("resizeImage", __filename);
+
 export default async function resizeImage({
   inputFile,
   outputFile,
@@ -10,12 +12,7 @@ export default async function resizeImage({
   outputFile: string;
   resizedWidth: number;
 }): Promise<string> {
-  logger.debug(
-    "sharp: input=%s, output=%s, widtd=%d",
-    inputFile,
-    outputFile,
-    resizedWidth
-  );
+  log.trace({ inputFile, outputFile, resizedWidth }, "sharp: resize");
   await sharp(inputFile).resize(resizedWidth).toFile(outputFile);
   return outputFile;
 }

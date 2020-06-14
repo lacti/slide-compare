@@ -5,12 +5,13 @@ import * as path from "path";
 
 import { logger } from "../utils/logger";
 import pdftoppm from "../convert/pdftoppm";
+import pngquant from "./pngquant";
 import resizeImageAndZip from "./resizeImageAndZip";
+import resizedFilename from "./resizedFilename";
 import tempy from "tempy";
-import updateSlideMeta from "../slide/updateSlideMeta";
 import uploadSlidesToS3 from "../convert/uploadSlidesToS3";
 
-export const resizedFilename = "resized.zip";
+const log = logger.get("convertAndUpload", __filename);
 
 export default async function convertAndUpload({
   fileKey,
@@ -21,18 +22,21 @@ export default async function convertAndUpload({
 }): Promise<string[]> {
   const tempPath = tempy.directory();
 
-  logger.debug("Start to pdftoppm on [%s] with [%s]", fileKey, inputFile);
+  log.debug({ fileKey, inputFile }, "Start to pdftoppm");
   const slideFiles = await pdftoppm({
     inputFile,
     outputPath: tempPath,
   });
-  logger.debug("Complete to convert [%s] [%s]", fileKey, slideFiles.join(", "));
+  log.debug({ fileKey, slideFiles }, "Conversion completed");
 
   const resizedSlidesZipFile = await resizeImageAndZip({
     inputFiles: slideFiles,
     outputFile: path.join(tempPath, resizedFilename),
   });
-  logger.debug("Complete to resize [%s] [%s]", fileKey, resizedSlidesZipFile);
+  log.debug({ fileKey, resizedSlidesZipFile }, "Resize completed");
+
+  await pngquant({ pngFiles: slideFiles });
+  log.debug({ fileKey, slideFiles }, "Pngquant completed");
 
   try {
     const uploadedKeys = await uploadSlidesToS3({
@@ -40,13 +44,6 @@ export default async function convertAndUpload({
       slideFiles,
       resizedSlidesZipFile,
     });
-
-    await updateSlideMeta({
-      fileKey,
-      slideCount: slideFiles.length,
-      stage: "converted",
-    });
-    logger.debug("Upload completed [%s]", fileKey);
 
     return uploadedKeys;
   } finally {

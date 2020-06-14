@@ -2,6 +2,8 @@ import execa from "execa";
 import { logger } from "../utils/logger";
 import prepareConvertExternals from "./prepareConvertExternals";
 
+const log = logger.get("pngquant", __filename);
+
 export default async function pngquant({
   pngFiles,
   timeout = 60 * 1000,
@@ -10,11 +12,7 @@ export default async function pngquant({
   timeout?: number;
 }): Promise<void> {
   const { pngquantPath } = await prepareConvertExternals();
-  logger.debug(
-    "pngquant: executable=%s, pngFiles=%s",
-    pngquantPath,
-    pngFiles.join(", ")
-  );
+  log.trace({ pngquantPath, pngFiles }, "pngquant: start");
 
   const subprocess = execa(pngquantPath, [
     "--force",
@@ -34,7 +32,7 @@ export default async function pngquant({
     }, timeout);
     subprocess.then(({ exitCode, failed, killed, stdout, stderr }) => {
       clearTimeout(killer);
-      logger.debug("pngquant: stdout=%s, stderr=%s", stdout, stderr);
+      log.trace({ stdout, stderr }, "pngquant: process is completed");
 
       if (exitCode !== 0) {
         reject(new Error(`pngquant Error: ${stderr}`));
@@ -43,7 +41,7 @@ export default async function pngquant({
         reject(new Error(`pngquant: Failed or killed`));
       }
 
-      logger.debug("pngquant: completed [%s]", pngFiles.join(","));
+      log.trace({ pngFiles }, "pngquant: completed");
       resolve();
     });
   });

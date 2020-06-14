@@ -3,7 +3,6 @@ import * as path from "path";
 
 import AdmZip from "adm-zip";
 import ensureDirectory from "../utils/ensureDirectory";
-import pngquant from "./pngquant";
 import resizeImage from "./resizeImage";
 import tempy from "tempy";
 
@@ -32,13 +31,10 @@ export default async function resizeImageAndZip({
       });
       resizedFiles.push(resizedFilePath);
     }
-    await pngquant({
-      pngFiles: resizedFiles,
-    });
 
     const zip = new AdmZip();
     resizedFiles.forEach((resizedFilePath) =>
-      zip.addLocalFile(resizedFilePath, path.basename(resizedFilePath))
+      zip.addLocalFile(resizedFilePath)
     );
     zip.writeZip(outputFile);
     return outputFile;

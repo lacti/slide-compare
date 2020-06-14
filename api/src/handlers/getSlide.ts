@@ -1,18 +1,24 @@
 import "source-map-support/register";
 
+import { ApiError, handleApi } from "./base";
+
 import { APIGatewayProxyHandler } from "aws-lambda";
 import getSlideFilename from "../slide/getSlideFilename";
+import { logger } from "../utils/logger";
 import useS3 from "../aws/useS3";
 
-export const handle: APIGatewayProxyHandler = async (event) => {
-  const { fileKey, index } = event.pathParameters ?? {};
-  if (!fileKey || !index) {
-    return { statusCode: 404, body: "Not Found" };
-  }
+const log = logger.get("handle:getSlide", __filename);
 
-  const { s3, bucketName } = useS3();
-  const s3ObjectKey = `${fileKey}/${getSlideFilename(+index)}`;
-  try {
+export const handle: APIGatewayProxyHandler = handleApi({
+  log,
+  handle: async (event) => {
+    const { fileKey, index } = event.pathParameters ?? {};
+    if (!fileKey || !index) {
+      throw new ApiError(404);
+    }
+
+    const { s3, bucketName } = useS3();
+    const s3ObjectKey = `${fileKey}/${getSlideFilename(+index)}`;
     const s3Object = await s3
       .getObject({
         Bucket: bucketName,
@@ -29,8 +35,5 @@ export const handle: APIGatewayProxyHandler = async (event) => {
       body: s3Object.Body?.toString("base64") ?? "",
       isBase64Encoded: true,
     };
-  } catch (error) {
-    console.error(error);
-    return { statusCode: 404, body: "Not Found" };
-  }
-};
+  },
+});

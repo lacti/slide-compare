@@ -7,6 +7,8 @@ type PartialMatchPair = Pick<MatchPair, "type"> &
 
 type ResultAppend = (pair: PartialMatchPair) => void;
 
+const log = logger.get("resultBag", __filename);
+
 export default function newResultBag(): [MatchPair[], ResultAppend] {
   const result: MatchPair[] = [];
 
@@ -35,13 +37,15 @@ function resultAppend(result: MatchPair[]) {
 
 function logResultAppended() {
   return ({ type, leftIndex, rightIndex, areas }: PartialMatchPair) => {
-    logger.debug(
-      "[%s] %d / %d [%s <> %s] [%d][%o]",
-      type.toString(),
-      leftIndex ?? -1,
-      rightIndex ?? -1,
-      areas ? sumOfAreas(areas) : 0,
-      areas ?? []
+    log.trace(
+      {
+        type,
+        leftIndex,
+        rightIndex,
+        area: sumOfAreas(areas ?? []),
+        boxes: areas,
+      },
+      "Result added"
     );
   };
 }

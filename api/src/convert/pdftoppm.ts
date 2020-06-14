@@ -5,11 +5,12 @@ import ensureDirectory from "../utils/ensureDirectory";
 import execa from "execa";
 import getSlideFilename from "../slide/getSlideFilename";
 import { logger } from "../utils/logger";
-import pngquant from "./pngquant";
 import prepareConvertExternals from "./prepareConvertExternals";
 import resizeImage from "./resizeImage";
 
 const resizedWidth = 1600;
+
+const log = logger.get("pdftoppm", __filename);
 
 export default async function pdftoppm({
   inputFile,
@@ -22,12 +23,7 @@ export default async function pdftoppm({
 }): Promise<string[]> {
   ensureDirectory(outputPath);
   const { pdftoppmPath } = await prepareConvertExternals();
-  logger.debug(
-    "pdftoppm: executable=%s, input=%s, output=%s",
-    pdftoppmPath,
-    inputFile,
-    outputPath
-  );
+  log.trace({ pdftoppmPath, inputFile, outputPath }, "pdftoppm: start");
 
   const subprocess = execa(pdftoppmPath, [
     inputFile,
@@ -43,7 +39,7 @@ export default async function pdftoppm({
     }, timeout);
     subprocess.then(({ exitCode, failed, killed, stdout, stderr }) => {
       clearTimeout(killer);
-      logger.debug("pdftoppm: stdout=%s, stderr=%s", stdout, stderr);
+      log.trace({ stdout, stderr }, "pdftoppm: process completed");
 
       if (exitCode !== 0) {
         reject(new Error(`pdftoppm Error: ${stderr}`));
@@ -52,9 +48,9 @@ export default async function pdftoppm({
         reject(new Error(`pdftoppm: Failed or killed`));
       }
 
-      logger.debug("pdftoppm: postprocess [%s] [%s]", inputFile, outputPath);
+      log.trace({ inputFile, outputPath }, "pdftoppm: postprocess");
       postprocess(outputPath).then((outputFiles) => {
-        logger.debug("pdftoppm: completed [%s]", outputFiles.join(", "));
+        log.trace({ outputFiles }, "pdftoppm: completed");
         resolve(outputFiles);
       });
     });
@@ -74,11 +70,7 @@ async function postprocess(oldFilesPath: string): Promise<string[]> {
     .sort((a, b) => a.fileNumber - b.fileNumber)) {
     const newFilePath = path.join(oldFilesPath, getSlideFilename(slide));
 
-    logger.debug(
-      "pdftoppm: Resize PNG from PDF [%s] -> [%s]",
-      oldFile.fullPath,
-      newFilePath
-    );
+    log.trace({ oldFile, newFilePath }, "pdftoppm: Resize PNG from PDF");
     await resizeImage({
       inputFile: oldFile.fullPath,
       outputFile: newFilePath,
@@ -89,7 +81,5 @@ async function postprocess(oldFilesPath: string): Promise<string[]> {
     fs.unlinkSync(oldFile.fullPath);
     ++slide;
   }
-
-  await pngquant({ pngFiles: outputFiles });
   return outputFiles;
 }

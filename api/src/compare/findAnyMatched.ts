@@ -3,6 +3,7 @@ import findDifferentAreas, {
 } from "./findDifferentAreas";
 
 import CoordBounds from "./models/coordBounds";
+import { logger } from "../utils/logger";
 
 interface MatchCandidate {
   rightIndex: number;
@@ -13,6 +14,8 @@ export type FindAnyMatchedOptions = {
   maxMovement: number;
 } & FindDifferentAreasOptions;
 
+const log = logger.get("findAnyMatched", __filename);
+
 export default async function findAnyMatched(
   rightFiles: string[],
   leftFile: string,
@@ -21,7 +24,10 @@ export default async function findAnyMatched(
 ): Promise<MatchCandidate[]> {
   const candidates: MatchCandidate[] = [];
   async function findDiffAndUpdateCandidate(rightIndex: number) {
-    // logger.debug(leftIndex, secondFiles.length, rightIndex);
+    log.trace(
+      { leftIndex, countOfRightFiles: rightFiles.length, rightIndex },
+      "Try to find any matched slide pair"
+    );
     const areas = await findDifferentAreas(
       leftFile,
       rightFiles[rightIndex],

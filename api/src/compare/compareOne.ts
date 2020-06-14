@@ -11,12 +11,14 @@ import readSlideMeta from "../slide/readSlideMeta";
 import tempy from "tempy";
 import useS3 from "../aws/useS3";
 
+const log = logger.get("compareOne", __filename);
+
 export default async function compareOne({
   leftFileKey,
   rightFileKey,
 }: FileKeyPair): Promise<void> {
   const { deleteKey, putJSON } = useS3();
-  logger.info("Compare left=%s, right=%s");
+  log.info({ leftFileKey, rightFileKey }, "Start compare one");
 
   const [leftUnzipped, rightUnzipped] = [tempy.directory(), tempy.directory()];
   try {

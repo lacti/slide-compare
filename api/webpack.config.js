@@ -21,6 +21,10 @@ module.exports = {
     filename: "[name].js",
   },
   target: "node",
+  node: {
+    __dirname: true,
+    __filename: true,
+  },
   externals: [
     /aws-sdk/,
     nodeExternals({

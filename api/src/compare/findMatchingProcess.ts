@@ -2,6 +2,9 @@ import findAnyMatched, { FindAnyMatchedOptions } from "./findAnyMatched";
 
 import MatchCandidate from "./models/matchCandidate";
 import MatchProcessing from "./models/matchProcessing";
+import { logger } from "../utils/logger";
+
+const log = logger.get("findMatchProcessing", __filename);
 
 export default async function findMatchProcessing({
   leftFiles,
@@ -17,7 +20,10 @@ export default async function findMatchProcessing({
     imperfectMatches: [],
   };
   for (let leftIndex = 0; leftIndex < leftFiles.length; ++leftIndex) {
-    // logger.debug("Processing [%d / %d]", leftIndex, leftFiles.length);
+    log.trace(
+      { leftIndex, countOfLeftFiles: leftFiles.length },
+      "Find the match processing"
+    );
 
     const matches = await findAnyMatched(
       rightFiles,
