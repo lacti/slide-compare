@@ -1,0 +1,7 @@
+.InputCompareMark {
+  display: flex;
+  align-items: center;
+}
+.InputCompareMark svg {
+  margin: auto;
+}
