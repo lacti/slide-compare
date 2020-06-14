@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Import envrc from parent directory.
+type -t source_up > /dev/null
+if [ $? -eq 0 ]; then
+  source_up
+fi
+
+# Define common properties.
+export STAGE="dev"
+export SERVICE_URL="https://your.domain.name"
+
+# Define properties for frontend pages.
+export REACT_APP_SERVER_URL="${SERVICE_URL}"
+
+# Define properties for backend.
+export TEMP_BUCKET="your-temporary-bucket-name"
+
+# Define properties for backend logger.
+# export SLACK_WEBHOOK_URL="your-slack-webhook-url"
+# export SLACK_CHANNEL="SLACK_CHANNEL"
+# export SLACK_LOG_LEVEL="info"
+export CONSOLE_LOG_LEVEL="trace"
