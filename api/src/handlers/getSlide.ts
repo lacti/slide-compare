@@ -1,7 +1,7 @@
 import "source-map-support/register";
 
 import { APIGatewayProxyHandler } from "aws-lambda";
-import getUnzippedSlideFileName from "../compare/getUnzippedSlideFileName";
+import getSlideFilename from "../slide/getSlideFilename";
 import useS3 from "../aws/useS3";
 
 export const handle: APIGatewayProxyHandler = async (event) => {
@@ -11,7 +11,7 @@ export const handle: APIGatewayProxyHandler = async (event) => {
   }
 
   const { s3, bucketName } = useS3();
-  const s3ObjectKey = `slides/${fileKey}/${getUnzippedSlideFileName(+index)}`;
+  const s3ObjectKey = `${fileKey}/${getSlideFilename(+index)}`;
   try {
     const s3Object = await s3
       .getObject({

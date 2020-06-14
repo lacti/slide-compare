@@ -53,5 +53,48 @@ export default function useS3() {
       .promise();
   }
 
-  return { s3, bucketName, downloadToLocal, uploadLocalFile, deleteKey };
+  function putJSON<T>({
+    s3ObjectKey,
+    value,
+  }: {
+    s3ObjectKey: string;
+    value: T | null;
+  }) {
+    return s3
+      .putObject({
+        Bucket: bucketName,
+        Key: s3ObjectKey,
+        Body: !value ? "" : JSON.stringify(value),
+      })
+      .promise();
+  }
+
+  function getJSON<T>({
+    s3ObjectKey,
+  }: {
+    s3ObjectKey: string;
+  }): Promise<T | null> {
+    return s3
+      .getObject({
+        Bucket: bucketName,
+        Key: s3ObjectKey,
+      })
+      .promise()
+      .then((result) => {
+        if (!result.Body) {
+          return null;
+        }
+        return JSON.parse(result.Body as string) as T;
+      });
+  }
+
+  return {
+    s3,
+    bucketName,
+    downloadToLocal,
+    uploadLocalFile,
+    deleteKey,
+    getJSON,
+    putJSON,
+  };
 }

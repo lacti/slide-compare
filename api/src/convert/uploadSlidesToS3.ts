@@ -6,12 +6,12 @@ import useS3 from "../aws/useS3";
 export default async function uploadSlidesToS3({
   fileKey,
   slideFiles,
-  resizedSlideFiles,
+  resizedSlidesZipFile,
   concurrency = 4,
 }: {
   fileKey: string;
   slideFiles: string[];
-  resizedSlideFiles: string[];
+  resizedSlidesZipFile: string;
   concurrency?: number;
 }): Promise<string[]> {
   const { uploadLocalFile } = useS3();
@@ -20,7 +20,7 @@ export default async function uploadSlidesToS3({
   const limit = pLimit(concurrency);
   const promises: Promise<unknown>[] = [];
   for (const slideFile of slideFiles) {
-    const slideKey = `slides/${fileKey}/${path.basename(slideFile)}`;
+    const slideKey = `${fileKey}/${path.basename(slideFile)}`;
     uploadedKeys.push(slideKey);
     promises.push(
       limit(() =>
@@ -31,18 +31,16 @@ export default async function uploadSlidesToS3({
       )
     );
   }
-  for (const resizedSlideFile of resizedSlideFiles) {
-    const smallKey = `smalls/${fileKey}/${path.basename(resizedSlideFile)}`;
-    uploadedKeys.push(smallKey);
-    promises.push(
-      limit(() =>
-        uploadLocalFile({
-          s3ObjectKey: smallKey,
-          localFile: resizedSlideFile,
-        })
-      )
-    );
-  }
+  const resizedZipKey = `${fileKey}/${path.basename(resizedSlidesZipFile)}`;
+  uploadedKeys.push(resizedZipKey);
+  promises.push(
+    limit(() =>
+      uploadLocalFile({
+        s3ObjectKey: resizedZipKey,
+        localFile: resizedSlidesZipFile,
+      })
+    )
+  );
   await Promise.all(promises);
   return uploadedKeys;
 }

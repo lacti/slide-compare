@@ -3,12 +3,13 @@ import "source-map-support/register";
 import { APIGatewayProxyHandler } from "aws-lambda";
 import useS3 from "../aws/useS3";
 import { v4 as uuidv4 } from "uuid";
+import writeSlideMeta from "../slide/writeSlideMeta";
 
 const allowedTypes = ["pdf"];
 
 export const handle: APIGatewayProxyHandler = async (event) => {
-  const { type = "pdf" } = event.queryStringParameters ?? {};
-  if (!allowedTypes.includes(type)) {
+  const { type = "pdf", name } = event.queryStringParameters ?? {};
+  if (!name || !allowedTypes.includes(type)) {
     return { statusCode: 404, body: "Not Found" };
   }
 
@@ -21,6 +22,8 @@ export const handle: APIGatewayProxyHandler = async (event) => {
     ContentType: `application/${type}`,
     ACL: "public-read",
   });
+
+  await writeSlideMeta({ name, fileKey, slideCount: -1, stage: "init" });
   return {
     statusCode: 200,
     body: JSON.stringify({ fileKey, url: signedUrl }),
@@ -28,5 +31,6 @@ export const handle: APIGatewayProxyHandler = async (event) => {
 };
 
 function newFileKey(type: string) {
-  return `${uuidv4()}-${uuidv4()}.${type}`;
+  const newHash = (uuidv4() + uuidv4()).replace(/-/g, "");
+  return `${newHash}.${type}`;
 }

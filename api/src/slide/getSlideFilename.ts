@@ -1,6 +1,6 @@
 const slideFilenameLength = 3;
 
-export default function getUnzippedSlideFileName(slide: number): string {
+export default function getSlideFilename(slide: number): string {
   return zeroLpad(slide.toString(), slideFilenameLength) + ".png";
 }
 

@@ -64,7 +64,7 @@ functions:
   convertPdf:
     handler: src/handlers/convertPdf.handle
     memorySize: 2048
-    timeout: 90
+    timeout: 180
     events:
       - s3:
           bucket: ${env:TEMP_BUCKET}
@@ -73,12 +73,12 @@ functions:
             - prefix: uploads/
             - suffix: .pdf
           existing: true
-  convertPdfHttp:
-    handler: src/handlers/convertPdf.handleHttp
-    memorySize: 2048
-    timeout: 30
+  getSlideMeta:
+    handler: src/handlers/getSlideMeta.handle
+    memorySize: 256
+    timeout: 5
     events:
-      - http: POST /convert/pdf/{fileKey}
+      - http: GET /slide/{fileKey}
   getSlide:
     handler: src/handlers/getSlide.handle
     memorySize: 256
