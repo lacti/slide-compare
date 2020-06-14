@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v1
 
       - name: "Build frontend pages and deploy them with backend"
-        run: cd pages && yarn && yarn build && cd ../api && yarn deploy
+        run: cd pages && yarn && yarn build && cd ../api && yarn && yarn deploy
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
