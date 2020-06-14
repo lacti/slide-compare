@@ -9,7 +9,8 @@
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "start": "serverless offline --noPrependStageInUrl",
     "build": "node --max-old-space-size=4096 node_modules/serverless/bin/serverless.js package",
-    "deploy": "node --max-old-space-size=4096 node_modules/serverless/bin/serverless.js deploy"
+    "deploy": "node --max-old-space-size=4096 node_modules/serverless/bin/serverless.js deploy",
+    "deploy:pages": "serverless deploy -f serveHtml"
   },
   "dependencies": {
     "@types/sharp": "^0.25.0",
