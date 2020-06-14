@@ -21,32 +21,25 @@ export default async function convertAndCompare({
 }): Promise<SlideDiffLoaded> {
   onProgress({
     type: "info",
-    text: "Convert an old file to compare.",
-    value: 25,
+    text: "Convert presentation files to compare.",
+    value: 33,
   });
   await sleep(200);
 
   const [leftFileKey, rightFileKey] = await Promise.all([
-    convertToPng(leftFile).catch((error) => {
-      onProgress({
-        type: "error",
-        text: `Cannot convert an old file: ${error.message}`,
-        value: 50,
-      });
-      throw error;
-    }),
-    convertToPng(rightFile).catch((error) => {
-      onProgress({
-        type: "error",
-        text: `Cannot convert a new file: ${error.message}`,
-        value: 50,
-      });
-      throw error;
-    }),
-  ]);
+    convertToPng(leftFile),
+    convertToPng(rightFile),
+  ]).catch((error) => {
+    onProgress({
+      type: "error",
+      text: `Cannot convert presentation files: ${error.message}`,
+      value: 50,
+    });
+    throw error;
+  });
   await sleep(200);
 
-  onProgress({ type: "info", text: "Compare two presentations.", value: 75 });
+  onProgress({ type: "info", text: "Compare two presentations.", value: 67 });
   await sleep(200);
 
   const completion = await compare({ leftFileKey, rightFileKey }).catch(
@@ -54,7 +47,7 @@ export default async function convertAndCompare({
       onProgress({
         type: "error",
         text: `Cannot compare two files: ${error.message}`,
-        value: 75,
+        value: 67,
       });
       throw error;
     }
