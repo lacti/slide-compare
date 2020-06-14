@@ -3,5 +3,4 @@ node_modules
 .webpack
 .envrc
 .pages
-.external
 yarn*.log*
