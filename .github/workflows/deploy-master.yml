@@ -24,3 +24,4 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           STAGE: ${{ secrets.STAGE }}
           TEMP_BUCKET: ${{ secrets.TEMP_BUCKET }}
+          CONSOLE_LOG_LEVEL: ${{ secrets.CONSOLE_LOG_LEVEL }}
