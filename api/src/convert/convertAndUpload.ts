@@ -10,6 +10,8 @@ import tempy from "tempy";
 import updateSlideMeta from "../slide/updateSlideMeta";
 import uploadSlidesToS3 from "../convert/uploadSlidesToS3";
 
+export const resizedFilename = "resized.zip";
+
 export default async function convertAndUpload({
   fileKey,
   inputFile,
@@ -28,7 +30,7 @@ export default async function convertAndUpload({
 
   const resizedSlidesZipFile = await resizeImageAndZip({
     inputFiles: slideFiles,
-    outputFile: path.join(tempPath, "resized.zip"),
+    outputFile: path.join(tempPath, resizedFilename),
   });
   logger.debug("Complete to resize [%s] [%s]", fileKey, resizedSlidesZipFile);
 

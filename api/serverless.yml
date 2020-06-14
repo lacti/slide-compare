@@ -73,6 +73,30 @@ functions:
             - prefix: uploads/
             - suffix: .pdf
           existing: true
+  requestToCompare:
+    handler: src/handlers/requestToCompare.handle
+    memorySize: 256
+    timeout: 5
+    events:
+      - http: PUT /compare/{leftFileKey}/{rightFileKey}
+  compare:
+    handler: src/handlers/compare.handle
+    memorySize: 2048
+    timeout: 180
+    events:
+      - s3:
+          bucket: ${env:TEMP_BUCKET}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploads/
+            - suffix: .compare
+          existing: true
+  getCompared:
+    handler: src/handlers/getCompared.handle
+    memorySize: 256
+    timeout: 5
+    events:
+      - http: GET /compare/{leftFileKey}/{rightFileKey}
   getSlideMeta:
     handler: src/handlers/getSlideMeta.handle
     memorySize: 256

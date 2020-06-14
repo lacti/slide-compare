@@ -88,6 +88,24 @@ export default function useS3() {
       });
   }
 
+  async function exists({
+    s3ObjectKey,
+  }: {
+    s3ObjectKey: string;
+  }): Promise<boolean> {
+    try {
+      await s3
+        .headObject({
+          Bucket: bucketName,
+          Key: s3ObjectKey,
+        })
+        .promise();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   return {
     s3,
     bucketName,
@@ -96,5 +114,6 @@ export default function useS3() {
     deleteKey,
     getJSON,
     putJSON,
+    exists,
   };
 }
