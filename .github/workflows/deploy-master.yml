@@ -1,0 +1,26 @@
+name: "Deploy master"
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Clone this repository"
+        uses: actions/checkout@v1
+
+      - name: "Build frontend pages and deploy them with backend"
+        run: cd pages && yarn && yarn build && cd ../api && yarn deploy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_DEFAULT_OUTPUT: ${{ secrets.AWS_DEFAULT_OUTPUT }}
+          REACT_APP_SERVER_URL: ${{ secrets.REACT_APP_SERVER_URL }}
+          SERVICE_URL: ${{ secrets.SERVICE_URL }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_LOG_LEVEL: ${{ secrets.SLACK_LOG_LEVEL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          STAGE: ${{ secrets.STAGE }}
+          TEMP_BUCKET: ${{ secrets.TEMP_BUCKET }}
