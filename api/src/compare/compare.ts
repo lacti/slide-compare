@@ -35,8 +35,18 @@ export default async function compare({
     },
   });
   return buildResultBag({
-    leftFiles,
-    rightFiles,
+    countOfLeftFiles: leftFiles.length,
+    countOfRightFiles: rightFiles.length,
     processing,
   });
+}
+
+if (require.main === module) {
+  compare({
+    leftPath: process.argv[2]!,
+    rightPath: process.argv[3]!,
+    maxMovement: 5,
+  })
+    .then((result) => console.info(JSON.stringify(result, null, 2)))
+    .catch(console.error);
 }

@@ -1,3 +1,4 @@
+import IndexPair from "./models/indexPair";
 import MatchPair from "./models/matchPair";
 import MatchProcessing from "./models/matchProcessing";
 import MatchType from "./models/matchType";
@@ -6,17 +7,17 @@ import newResultBag from "./newResultBag";
 
 export default function buildResultBag({
   processing,
-  leftFiles,
-  rightFiles,
+  countOfLeftFiles,
+  countOfRightFiles,
 }: {
   processing: MatchProcessing;
-  leftFiles: string[];
-  rightFiles: string[];
+  countOfLeftFiles: number;
+  countOfRightFiles: number;
 }): MatchPair[] {
   const [bag, append] = newResultBag();
 
   // Step 1. Find all perfect matches.
-  for (let leftIndex = 0; leftIndex < leftFiles.length; ++leftIndex) {
+  for (let leftIndex = 0; leftIndex < countOfLeftFiles; ++leftIndex) {
     const maybePerfectMatch = processing.perfectMatches.find(
       (tuple) => tuple.leftIndex === leftIndex
     );
@@ -30,35 +31,43 @@ export default function buildResultBag({
     });
   }
 
-  // Step 2. Find all removed and imperfect matches.
-  const imperfectsWithoutPerfects = getPureImperfectMatches(processing);
-  for (let leftIndex = 0; leftIndex < leftFiles.length; ++leftIndex) {
-    const maybeImperfectMatch = imperfectsWithoutPerfects.find(
-      (tuple) => tuple.leftIndex === leftIndex
-    );
-    if (maybeImperfectMatch === undefined) {
+  // Step 2. Match imperfects greedy.
+  const pureImperfects = getPureImperfectMatches(processing);
+  const imperfectMatched: IndexPair[] = [];
+  for (const { leftIndex, rightIndex, areas } of pureImperfects) {
+    if (
+      imperfectMatched.some(
+        (matched) =>
+          matched.leftIndex === leftIndex || matched.rightIndex === rightIndex
+      )
+    ) {
       continue;
     }
-    if (maybeImperfectMatch.matches.length === 0) {
-      append({
-        type: MatchType.Removed,
-        leftIndex,
-      });
-    } else {
-      append({
-        type: MatchType.Matched,
-        leftIndex,
-        rightIndex: maybeImperfectMatch.matches[0].rightIndex,
-        areas: maybeImperfectMatch.matches[0].areas,
-      });
-    }
+    append({
+      type: MatchType.Matched,
+      leftIndex,
+      rightIndex,
+      areas,
+    });
+    imperfectMatched.push({ leftIndex, rightIndex });
   }
 
-  // Step 3. Find all newly added slides.
+  // Step 3. Find all removed slides.
+  const matchedLeftIndexes = new Set(
+    bag.map((pair) => pair.leftIndex).filter((index) => index >= 0)
+  );
+  for (let leftIndex = 0; leftIndex < countOfLeftFiles; ++leftIndex) {
+    if (matchedLeftIndexes.has(leftIndex)) {
+      continue;
+    }
+    append({ type: MatchType.Removed, leftIndex });
+  }
+
+  // Step 4. Find all newly added slides.
   const matchedRightIndexes = new Set(
     bag.map((pair) => pair.rightIndex).filter((index) => index >= 0)
   );
-  for (let rightIndex = 0; rightIndex < rightFiles.length; ++rightIndex) {
+  for (let rightIndex = 0; rightIndex < countOfRightFiles; ++rightIndex) {
     if (matchedRightIndexes.has(rightIndex)) {
       continue;
     }
@@ -66,12 +75,12 @@ export default function buildResultBag({
   }
 
   return bag.sort((a, b) =>
-    a.leftIndex !== -1 && b.leftIndex !== -1
-      ? a.leftIndex - b.rightIndex
-      : a.leftIndex === -1
+    a.rightIndex !== -1 && b.rightIndex !== -1
+      ? a.rightIndex - b.rightIndex
+      : a.rightIndex === -1
       ? 1
-      : b.leftIndex === -1
+      : b.rightIndex === -1
       ? -1
-      : a.rightIndex - b.rightIndex
+      : a.leftIndex - b.leftIndex
   );
 }

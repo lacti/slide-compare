@@ -40,21 +40,26 @@ export default async function findAnyMatched(
     return false;
   }
 
-  let beforeIndex = leftIndex;
-  let afterIndex = leftIndex + 1;
+  // In almost cases, a new presentation has more new slides.
+  let afterIndex = leftIndex;
+  for (let movement = 0; movement < options.maxMovement; ++movement) {
+    if (0 <= afterIndex && afterIndex < rightFiles.length) {
+      if (await findDiffAndUpdateCandidate(afterIndex)) {
+        return newPerfectMatch(afterIndex);
+      }
+    }
+    ++afterIndex;
+  }
+
+  // Or, maybe they can be removed.
+  let beforeIndex = leftIndex - 1;
   for (let movement = 0; movement < options.maxMovement; ++movement) {
     if (0 <= beforeIndex && beforeIndex < rightFiles.length) {
       if (await findDiffAndUpdateCandidate(beforeIndex)) {
         return newPerfectMatch(beforeIndex);
       }
-      --beforeIndex;
     }
-    if (0 <= afterIndex && afterIndex < rightFiles.length) {
-      if (await findDiffAndUpdateCandidate(afterIndex)) {
-        return newPerfectMatch(afterIndex);
-      }
-      ++afterIndex;
-    }
+    --beforeIndex;
   }
   return candidates;
 }

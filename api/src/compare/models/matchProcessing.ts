@@ -1,9 +1,5 @@
+import IndexPair from "./indexPair";
 import MatchCandidate from "./matchCandidate";
-
-interface IndexPair {
-  leftIndex: number;
-  rightIndex: number;
-}
 
 interface ImperfectMatch {
   leftIndex: number;
