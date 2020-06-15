@@ -38,20 +38,14 @@ export default async function compare({
     throw new Error("Comparison timeout.");
   })();
 
-  const matches = compared.matchPairs
-    .sort((a, b) =>
-      a.rightIndex !== b.rightIndex
-        ? a.rightIndex - b.rightIndex
-        : a.leftIndex - b.leftIndex
-    )
-    .map((pair) => ({
-      leftFileKey: compared.leftMeta.fileKey,
-      rightFileKey: compared.rightMeta.fileKey,
-      matchType: pair.type,
-      leftIndex: pair.leftIndex,
-      rightIndex: pair.rightIndex,
-      areas: pair.areas,
-    }));
+  const matches = compared.matchPairs.map((pair) => ({
+    leftFileKey: compared.leftMeta.fileKey,
+    rightFileKey: compared.rightMeta.fileKey,
+    matchType: pair.type,
+    leftIndex: pair.leftIndex,
+    rightIndex: pair.rightIndex,
+    areas: pair.areas,
+  }));
   return {
     matches,
     info: {
