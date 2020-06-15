@@ -41,8 +41,9 @@ export default async function findAnyMatched(
   }
 
   // In almost cases, a new presentation has more new slides.
+  const { maxMovement } = options;
   let afterIndex = leftIndex;
-  for (let movement = 0; movement < options.maxMovement; ++movement) {
+  for (let movement = 0; movement < maxMovement; ++movement) {
     if (0 <= afterIndex && afterIndex < rightFiles.length) {
       if (await findDiffAndUpdateCandidate(afterIndex)) {
         return newPerfectMatch(afterIndex);
@@ -53,7 +54,7 @@ export default async function findAnyMatched(
 
   // Or, maybe they can be removed.
   let beforeIndex = leftIndex - 1;
-  for (let movement = 0; movement < options.maxMovement; ++movement) {
+  for (let movement = 0; movement < maxMovement; ++movement) {
     if (0 <= beforeIndex && beforeIndex < rightFiles.length) {
       if (await findDiffAndUpdateCandidate(beforeIndex)) {
         return newPerfectMatch(beforeIndex);

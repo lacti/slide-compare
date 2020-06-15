@@ -45,7 +45,7 @@ if (require.main === module) {
   compare({
     leftPath: process.argv[2]!,
     rightPath: process.argv[3]!,
-    maxMovement: 5,
+    maxMovement: -1,
   })
     .then((result) => console.info(JSON.stringify(result, null, 2)))
     .catch(console.error);

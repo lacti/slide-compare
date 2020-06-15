@@ -2,6 +2,7 @@ import * as fs from "fs";
 
 import { toCompareS3Key, toComparedResultS3Key } from "../compare/compareS3Key";
 
+import CompareRequest from "./models/compareRequest";
 import FileKeyPair from "./models/fileKeyPair";
 import SlideCompared from "./models/slideCompared";
 import compare from "./compare";
@@ -17,8 +18,11 @@ export default async function compareOne({
   leftFileKey,
   rightFileKey,
 }: FileKeyPair): Promise<void> {
-  const { deleteKey, putJSON } = useS3();
-  log.info({ leftFileKey, rightFileKey }, "Start compare one");
+  const { deleteKey, getJSON, putJSON } = useS3();
+  const request = await getJSON<CompareRequest>({
+    s3ObjectKey: toCompareS3Key({ leftFileKey, rightFileKey }),
+  });
+  log.info({ request, leftFileKey, rightFileKey }, "Start compare one");
 
   const [leftUnzipped, rightUnzipped] = [tempy.directory(), tempy.directory()];
   try {
@@ -40,6 +44,7 @@ export default async function compareOne({
     const matchPairs = await compare({
       leftPath: leftUnzipped,
       rightPath: rightUnzipped,
+      maxMovement: request?.maxMovement,
     });
     await putJSON<SlideCompared>({
       s3ObjectKey: toComparedResultS3Key({ leftFileKey, rightFileKey }),

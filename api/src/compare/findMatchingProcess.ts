@@ -15,6 +15,11 @@ export default async function findMatchProcessing({
   rightFiles: string[];
   matchOptions: FindAnyMatchedOptions;
 }): Promise<MatchProcessing> {
+  // Compare with full scan.
+  if (matchOptions.maxMovement < 0) {
+    matchOptions.maxMovement = Math.max(leftFiles.length, rightFiles.length);
+  }
+
   const processing: MatchProcessing = {
     perfectMatches: [],
     imperfectMatches: [],
