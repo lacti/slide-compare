@@ -2,9 +2,10 @@ import { FileSelected } from "../components/StyledDropzone";
 import { UploadFile } from "./models/upload";
 import { ensureJSONResult } from "./ensureResult";
 import getSlideMeta from "./getSlideMeta";
+import repeatUntil from "./repeatUntil";
 import serverUrls from "./serverUrls";
-import sleep from "../utils/sleep";
 
+const maxWaitingSeconds = 600;
 const waitingIntervals = [3, 25, 25, 15, 15, 10, 10, 10, 5, 5, 2];
 
 export default async function convertToPng({ file, path }: FileSelected) {
@@ -21,12 +22,17 @@ export default async function convertToPng({ file, path }: FileSelected) {
   }).then((r) => r.text());
   console.debug("Upload a file to convert", file, fileKey);
 
-  for (const interval of waitingIntervals) {
-    await sleep(interval * 1000);
-    const meta = await getSlideMeta({ fileKey });
-    if (meta.stage === "converted") {
+  return repeatUntil({
+    maxWaitingSeconds,
+    waitingIntervals,
+    defaultWaitingInterval: 30,
+    timeoutErrorMessage: "File is too big.",
+    delegate: async () => {
+      const meta = await getSlideMeta({ fileKey });
+      if (meta.stage !== "converted") {
+        return null;
+      }
       return fileKey;
-    }
-  }
-  throw new Error("File is too big.");
+    },
+  });
 }

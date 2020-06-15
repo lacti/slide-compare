@@ -6,7 +6,7 @@ const log = logger.get("pngquant", __filename);
 
 export default async function pngquant({
   pngFiles,
-  timeout = 60 * 1000,
+  timeout = 300 * 1000,
 }: {
   pngFiles: string[];
   timeout?: number;

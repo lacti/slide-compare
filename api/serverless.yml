@@ -67,7 +67,7 @@ functions:
   convertPdf:
     handler: src/handlers/convertPdf.handle
     memorySize: 2048
-    timeout: 180
+    timeout: 600
     events:
       - s3:
           bucket: ${env:TEMP_BUCKET}
@@ -87,7 +87,7 @@ functions:
   compare:
     handler: src/handlers/compare.handle
     memorySize: 2048
-    timeout: 180
+    timeout: 600
     events:
       - s3:
           bucket: ${env:TEMP_BUCKET}

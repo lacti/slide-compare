@@ -3,9 +3,10 @@ import { ComparisonRequested, SlideCompared } from "./models/compare";
 import SlideDiffLoaded from "../models/slideDiffLoaded";
 import { ensureJSONResult } from "./ensureResult";
 import getCompared from "./getCompared";
+import repeatUntil from "./repeatUntil";
 import serverUrls from "./serverUrls";
-import sleep from "../utils/sleep";
 
+const maxWaitingSeconds = 600;
 const waitingIntervals = [3, 15, 15, 15, 15, 10, 10, 10, 5, 5, 5, 2];
 
 export default async function compare({
@@ -27,15 +28,19 @@ export default async function compare({
         (r) => r as SlideCompared
       );
     }
-    for (const interval of waitingIntervals) {
-      await sleep(interval * 1000);
-      const maybe = await getCompared({ leftFileKey, rightFileKey });
-      if ("pending" in maybe) {
-        continue;
-      }
-      return maybe as SlideCompared;
-    }
-    throw new Error("Comparison timeout.");
+    return repeatUntil({
+      maxWaitingSeconds,
+      waitingIntervals,
+      defaultWaitingInterval: 30,
+      timeoutErrorMessage: "Comparison timeout.",
+      delegate: async () => {
+        const maybe = await getCompared({ leftFileKey, rightFileKey });
+        if ("pending" in maybe) {
+          return null;
+        }
+        return maybe as SlideCompared;
+      },
+    });
   })();
 
   const matches = compared.matchPairs.map((pair) => ({

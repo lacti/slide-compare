@@ -15,7 +15,7 @@ const log = logger.get("pdftoppm", __filename);
 export default async function pdftoppm({
   inputFile,
   outputPath,
-  timeout = 90 * 1000,
+  timeout = 300 * 1000,
 }: {
   inputFile: string;
   outputPath: string;
