@@ -32,14 +32,20 @@ export default async function pngquant({
     }, timeout);
     subprocess.then(({ exitCode, failed, killed, stdout, stderr }) => {
       clearTimeout(killer);
-      log.trace({ stdout, stderr }, "pngquant: process is completed");
+      log.trace(
+        { stdout, stderr, exitCode, failed, killed },
+        "pngquant: process is completed"
+      );
 
+      /*
+      // pngquant would return non-zero code if there are skipped images.
       if (exitCode !== 0) {
         reject(new Error(`pngquant Error: ${stderr}`));
       }
       if (failed || killed) {
         reject(new Error(`pngquant: Failed or killed`));
       }
+      */
 
       log.trace({ pngFiles }, "pngquant: completed");
       resolve();
