@@ -6,7 +6,7 @@ import getCompared from "./getCompared";
 import serverUrls from "./serverUrls";
 import sleep from "../utils/sleep";
 
-const waitingIntervals = [3, 30, 30, 30, 15, 15, 15, 10, 5, 5, 5, 2];
+const waitingIntervals = [3, 15, 15, 15, 15, 10, 10, 10, 5, 5, 5, 2];
 
 export default async function compare({
   leftFileKey,

@@ -27,7 +27,10 @@ export const handle: APIGatewayProxyHandler = handleApi({
   handle: async (event) => {
     const requestPath = translateToBundlePath(event.path);
     const resourceFilePath = path.join(resourceRoot, requestPath);
-    console.log(requestPath, resourceFilePath);
+    log.trace(
+      { requestPath, resourceFilePath },
+      "Find a static resource to serve"
+    );
     if (!fs.existsSync(resourceFilePath)) {
       throw new ApiError(404);
     }

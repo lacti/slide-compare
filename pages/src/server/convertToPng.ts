@@ -5,7 +5,7 @@ import getSlideMeta from "./getSlideMeta";
 import serverUrls from "./serverUrls";
 import sleep from "../utils/sleep";
 
-const waitingIntervals = [3, 30, 30, 15, 15, 10, 10, 5, 5, 2];
+const waitingIntervals = [3, 25, 25, 15, 15, 10, 10, 10, 5, 5, 2];
 
 export default async function convertToPng({ file, path }: FileSelected) {
   const { fileKey, url: uploadUrl } = await fetch(
