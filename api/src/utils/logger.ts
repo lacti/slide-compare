@@ -89,23 +89,29 @@ export class Logger {
       );
     }
     if (this.slackLevel <= level) {
-      slackPromise = slackPromise.then(() =>
-        postToSlack(
-          `[${toLogLevelName(level).toUpperCase()}] ${message}\n` +
-            "```" +
-            JSON.stringify(
-              {
-                timestamp: new Date().toISOString(),
-                componentName: this.componentName,
-                filename: this.filename,
-                context,
-              },
-              null,
-              2
-            ).slice(0, maxSlackTextLength) +
-            "```"
+      slackPromise = slackPromise
+        .then(() =>
+          postToSlack(
+            `[${toLogLevelName(level).toUpperCase()}] ${message}\n` +
+              "```" +
+              JSON.stringify(
+                {
+                  timestamp: new Date().toISOString(),
+                  componentName: this.componentName,
+                  filename: this.filename,
+                  context,
+                },
+                null,
+                2
+              ).slice(0, maxSlackTextLength) +
+              "```"
+          )
         )
-      );
+        .catch((error) => {
+          // Ignore error
+          console.error("Cannot send a message to slack", error);
+          return Promise.resolve();
+        });
     }
   };
 }

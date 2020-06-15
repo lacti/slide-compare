@@ -37,23 +37,27 @@ export default async function pdftoppm({
       subprocess.kill("SIGTERM");
       reject(new Error("pdftoppm: Timeout occurred"));
     }, timeout);
-    subprocess.then(({ exitCode, failed, killed, stdout, stderr }) => {
-      clearTimeout(killer);
-      log.trace({ stdout, stderr }, "pdftoppm: process completed");
+    subprocess
+      .then(({ exitCode, failed, killed, stdout, stderr }) => {
+        clearTimeout(killer);
+        log.trace({ stdout, stderr }, "pdftoppm: process completed");
 
-      if (exitCode !== 0) {
-        reject(new Error(`pdftoppm Error: ${stderr}`));
-      }
-      if (failed || killed) {
-        reject(new Error(`pdftoppm: Failed or killed`));
-      }
+        if (exitCode !== 0) {
+          reject(new Error(`pdftoppm Error: ${stderr}`));
+        }
+        if (failed || killed) {
+          reject(new Error(`pdftoppm: Failed or killed`));
+        }
 
-      log.trace({ inputFile, outputPath }, "pdftoppm: postprocess");
-      postprocess(outputPath).then((outputFiles) => {
-        log.trace({ outputFiles }, "pdftoppm: completed");
-        resolve(outputFiles);
-      });
-    });
+        log.trace({ inputFile, outputPath }, "pdftoppm: postprocess");
+        postprocess(outputPath)
+          .then((outputFiles) => {
+            log.trace({ outputFiles }, "pdftoppm: completed");
+            resolve(outputFiles);
+          })
+          .catch(reject);
+      })
+      .catch(reject);
   });
 }
 
