@@ -30,25 +30,23 @@ export default async function pngquant({
       subprocess.kill("SIGTERM");
       reject(new Error("pngquant: Timeout occurred"));
     }, timeout);
-    subprocess.then(({ exitCode, failed, killed, stdout, stderr }) => {
-      clearTimeout(killer);
-      log.trace(
-        { stdout, stderr, exitCode, failed, killed },
-        "pngquant: process is completed"
-      );
+    subprocess
+      .then(({ exitCode, failed, killed, stdout, stderr }) => {
+        clearTimeout(killer);
+        log.trace(
+          { stdout, stderr, exitCode, failed, killed },
+          "pngquant: process is completed"
+        );
 
-      /*
-      // pngquant would return non-zero code if there are skipped images.
-      if (exitCode !== 0) {
-        reject(new Error(`pngquant Error: ${stderr}`));
-      }
-      if (failed || killed) {
-        reject(new Error(`pngquant: Failed or killed`));
-      }
-      */
-
-      log.trace({ pngFiles }, "pngquant: completed");
-      resolve();
-    });
+        // pngquant would return non-zero code if there are skipped images.
+        log.trace({ pngFiles }, "pngquant: completed");
+        resolve();
+      })
+      .catch((reason) => {
+        clearTimeout(killer);
+        // pngquant would return non-zero code if there are skipped images.
+        log.trace({ reason, pngFiles }, "pngquant: completed");
+        resolve();
+      });
   });
 }
