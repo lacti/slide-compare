@@ -25,7 +25,7 @@
     "p-timeout": "^3.2.0",
     "rimraf": "^3.0.2",
     "serialize-error": "^7.0.1",
-    "sharp": "^0.25.3",
+    "sharp": "^0.30.5",
     "source-map-support": "^0.5.19",
     "tar": "^6.0.2",
     "tempy": "^0.5.0",
